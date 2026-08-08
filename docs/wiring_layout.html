@@ -1,0 +1,256 @@
+<title>ALT60 — 配線レイアウト図</title>
+<style>
+  :root {
+    --bg: #f1efe7;
+    --panel: #ffffff;
+    --ink: #1d1f1a;
+    --ink-dim: #5c5f56;
+    --border: #d6d2c4;
+    --key-bg: #ffffff;
+    --key-bg-mod: #eae6d9;
+    --key-border: #c9c4b2;
+    --copper: #a85a2a;
+    --pcb: #3c7a5c;
+    --pcb-bg: #e7f0ea;
+    --danger: #a3402f;
+    --danger-bg: #f6e8e4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181a; --panel: #1f2225; --ink: #e9e7de; --ink-dim: #9a9d92;
+      --border: #33362f; --key-bg: #24272a; --key-bg-mod: #2c302a; --key-border: #3d4038;
+      --copper: #d68a4c; --pcb: #6fbf95; --pcb-bg: #1c2b23;
+      --danger: #d9836c; --danger-bg: #3a2420;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16181a; --panel: #1f2225; --ink: #e9e7de; --ink-dim: #9a9d92;
+    --border: #33362f; --key-bg: #24272a; --key-bg-mod: #2c302a; --key-border: #3d4038;
+    --copper: #d68a4c; --pcb: #6fbf95; --pcb-bg: #1c2b23;
+    --danger: #d9836c; --danger-bg: #3a2420;
+  }
+  :root[data-theme="light"] {
+    --bg: #f1efe7; --panel: #ffffff; --ink: #1d1f1a; --ink-dim: #5c5f56;
+    --border: #d6d2c4; --key-bg: #ffffff; --key-bg-mod: #eae6d9; --key-border: #c9c4b2;
+    --copper: #a85a2a; --pcb: #3c7a5c; --pcb-bg: #e7f0ea;
+    --danger: #a3402f; --danger-bg: #f6e8e4;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+    padding: 2.5rem 1.5rem 3.5rem;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+  header { margin-bottom: 1.5rem; }
+  h1 {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 1.4rem; font-weight: 700; margin: 0 0 0.5rem; text-wrap: balance;
+  }
+  header p { margin: 0; color: var(--ink-dim); font-size: 0.92rem; line-height: 1.65; max-width: 70ch; }
+  header p + p { margin-top: 0.5rem; }
+  code {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    background: var(--pcb-bg); color: var(--pcb); padding: 0.05rem 0.32rem; border-radius: 3px; font-size: 0.88em;
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 1.3rem; align-items: center;
+    margin: 1.4rem 0 1.6rem; padding: 0.85rem 1.1rem;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.82rem; color: var(--ink-dim);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+  .legend-swatch {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.3rem; height: 1.7rem; border-radius: 4px; border: 1px solid var(--key-border);
+    background: var(--key-bg); font-family: ui-monospace, monospace; font-size: 0.62rem;
+    color: var(--ink); position: relative;
+  }
+  .legend-swatch .pin-tag { position: absolute; top: 2px; left: 3px; font-size: 0.5rem; color: var(--copper); }
+  .legend-swatch.exc { background: var(--danger-bg); border-color: var(--danger); }
+  .legend-swatch.exc .pin-tag { color: var(--danger); }
+
+  .board { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem; overflow-x: auto; }
+  .board-inner { min-width: 820px; }
+  .rowline { display: flex; align-items: stretch; gap: 0.5rem; margin-bottom: 0.32rem; }
+  .rowline:last-child { margin-bottom: 0; }
+  .row-col-label {
+    flex: none; width: 3.6rem; display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 0.72rem; font-weight: 700;
+    color: var(--pcb); background: var(--pcb-bg); border-radius: 5px; text-align: center; line-height: 1.25;
+  }
+  .row { display: flex; gap: 0.32rem; flex: 1; }
+
+  .key {
+    position: relative; background: var(--key-bg); border: 1px solid var(--key-border);
+    border-radius: 5px; min-height: 3.1rem; display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 0.3rem 0.4rem; box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  }
+  .key.mod { background: var(--key-bg-mod); }
+  .key.exception { background: var(--danger-bg); border-color: var(--danger); }
+  .key .pin-tag {
+    position: absolute; top: 0.22rem; left: 0.4rem;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 0.62rem; line-height: 1;
+    color: var(--copper); letter-spacing: 0.01em; max-width: calc(100% - 0.6rem);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .key.exception .pin-tag { color: var(--danger); font-weight: 700; }
+  .key .main {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 0.82rem; font-weight: 600;
+    color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .u1   { flex: 1 1 0; }
+  .u1_25{ flex: 1.25 1 0; }
+  .u1_5 { flex: 1.5 1 0; }
+  .u1_75{ flex: 1.75 1 0; }
+  .u2   { flex: 2 1 0; }
+  .u2_25{ flex: 2.25 1 0; }
+  .u2_75{ flex: 2.75 1 0; }
+  .u6_25{ flex: 6.25 1 0; }
+
+  .notes { margin-top: 1.75rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem; }
+  .note { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--pcb); border-radius: 6px; padding: 0.8rem 0.95rem; }
+  .note.warn { border-left-color: var(--danger); }
+  .note h3 { margin: 0 0 0.35rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--pcb); }
+  .note.warn h3 { color: var(--danger); }
+  .note p { margin: 0; font-size: 0.82rem; line-height: 1.55; color: var(--ink-dim); }
+  .note code { font-family: ui-monospace, "SF Mono", Consolas, monospace; background: var(--key-bg-mod); padding: 0.05rem 0.3rem; border-radius: 3px; color: var(--ink); }
+</style>
+
+<div class="page">
+  <header>
+    <h1>ALT60 — 配線レイアウト図</h1>
+    <p>実際のキー配置の上に配線ピンを直書きした、はんだ付け作業用の図。左端の緑ラベルがその行全体をまとめる<strong>列ワイヤー</strong>(物理的な行1本につき1本)。各キーの銅色の小さい数字がその行内で使う<strong>行ワイヤー</strong>のピン番号。</p>
+    <p>配線は「同じ行の全キーを1本の列ワイヤーで直列に繋ぎ、各キーからそのポジション番号の行ワイヤーへ1本ずつ配線する」という通常のマトリクス配線そのまま。</p>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item">
+      <span class="legend-swatch"><span class="pin-tag">D0</span>Key</span>
+      通常キー(上:行ワイヤーのピン/下:キー)
+    </div>
+    <div class="legend-item">
+      <span class="legend-swatch exc"><span class="pin-tag">D16→D9</span>Key</span>
+      例外キー(自分の行の列ワイヤーではなく、Row5の列D9に配線)
+    </div>
+  </div>
+
+  <div class="board">
+    <div class="board-inner">
+
+      <div class="rowline">
+        <div class="row-col-label">列<br>D5</div>
+        <div class="row">
+          <div class="key u1"><span class="pin-tag">D0</span><span class="main">Esc</span></div>
+          <div class="key u1"><span class="pin-tag">D1</span><span class="main">1</span></div>
+          <div class="key u1"><span class="pin-tag">D2</span><span class="main">2</span></div>
+          <div class="key u1"><span class="pin-tag">D3</span><span class="main">3</span></div>
+          <div class="key u1"><span class="pin-tag">D4</span><span class="main">4</span></div>
+          <div class="key u1"><span class="pin-tag">D10</span><span class="main">5</span></div>
+          <div class="key u1"><span class="pin-tag">D14</span><span class="main">6</span></div>
+          <div class="key u1"><span class="pin-tag">D15</span><span class="main">7</span></div>
+          <div class="key u1"><span class="pin-tag">D16</span><span class="main">8</span></div>
+          <div class="key u1"><span class="pin-tag">D18</span><span class="main">9</span></div>
+          <div class="key u1"><span class="pin-tag">D19</span><span class="main">0</span></div>
+          <div class="key u1"><span class="pin-tag">D20</span><span class="main">-</span></div>
+          <div class="key u1"><span class="pin-tag">D21</span><span class="main">=</span></div>
+          <div class="key u2 mod exception"><span class="pin-tag">D16→D9</span><span class="main">Backspace</span></div>
+        </div>
+      </div>
+
+      <div class="rowline">
+        <div class="row-col-label">列<br>D6</div>
+        <div class="row">
+          <div class="key u1_5"><span class="pin-tag">D0</span><span class="main">Tab</span></div>
+          <div class="key u1"><span class="pin-tag">D1</span><span class="main">Q</span></div>
+          <div class="key u1"><span class="pin-tag">D2</span><span class="main">W</span></div>
+          <div class="key u1"><span class="pin-tag">D3</span><span class="main">E</span></div>
+          <div class="key u1"><span class="pin-tag">D4</span><span class="main">R</span></div>
+          <div class="key u1"><span class="pin-tag">D10</span><span class="main">T</span></div>
+          <div class="key u1"><span class="pin-tag">D14</span><span class="main">Y</span></div>
+          <div class="key u1"><span class="pin-tag">D15</span><span class="main">U</span></div>
+          <div class="key u1"><span class="pin-tag">D16</span><span class="main">I</span></div>
+          <div class="key u1"><span class="pin-tag">D18</span><span class="main">O</span></div>
+          <div class="key u1"><span class="pin-tag">D19</span><span class="main">P</span></div>
+          <div class="key u1"><span class="pin-tag">D20</span><span class="main">[</span></div>
+          <div class="key u1"><span class="pin-tag">D21</span><span class="main">]</span></div>
+          <div class="key u1_5 mod exception"><span class="pin-tag">D18→D9</span><span class="main">\</span></div>
+        </div>
+      </div>
+
+      <div class="rowline">
+        <div class="row-col-label">列<br>D7</div>
+        <div class="row">
+          <div class="key u1_75 mod"><span class="pin-tag">D0</span><span class="main">Ctrl</span></div>
+          <div class="key u1"><span class="pin-tag">D1</span><span class="main">A</span></div>
+          <div class="key u1"><span class="pin-tag">D2</span><span class="main">S</span></div>
+          <div class="key u1"><span class="pin-tag">D3</span><span class="main">D</span></div>
+          <div class="key u1"><span class="pin-tag">D4</span><span class="main">F</span></div>
+          <div class="key u1"><span class="pin-tag">D10</span><span class="main">G</span></div>
+          <div class="key u1"><span class="pin-tag">D14</span><span class="main">H</span></div>
+          <div class="key u1"><span class="pin-tag">D15</span><span class="main">J</span></div>
+          <div class="key u1"><span class="pin-tag">D16</span><span class="main">K</span></div>
+          <div class="key u1"><span class="pin-tag">D18</span><span class="main">L</span></div>
+          <div class="key u1"><span class="pin-tag">D19</span><span class="main">;</span></div>
+          <div class="key u1"><span class="pin-tag">D20</span><span class="main">'</span></div>
+          <div class="key u2_25 mod"><span class="pin-tag">D21</span><span class="main">Enter</span></div>
+        </div>
+      </div>
+
+      <div class="rowline">
+        <div class="row-col-label">列<br>D8</div>
+        <div class="row">
+          <div class="key u2_25 mod"><span class="pin-tag">D0</span><span class="main">Shift</span></div>
+          <div class="key u1"><span class="pin-tag">D1</span><span class="main">Z</span></div>
+          <div class="key u1"><span class="pin-tag">D2</span><span class="main">X</span></div>
+          <div class="key u1"><span class="pin-tag">D3</span><span class="main">C</span></div>
+          <div class="key u1"><span class="pin-tag">D4</span><span class="main">V</span></div>
+          <div class="key u1"><span class="pin-tag">D10</span><span class="main">B</span></div>
+          <div class="key u1"><span class="pin-tag">D14</span><span class="main">N</span></div>
+          <div class="key u1"><span class="pin-tag">D15</span><span class="main">M</span></div>
+          <div class="key u1"><span class="pin-tag">D16</span><span class="main">,</span></div>
+          <div class="key u1"><span class="pin-tag">D18</span><span class="main">.</span></div>
+          <div class="key u1"><span class="pin-tag">D19</span><span class="main">/</span></div>
+          <div class="key u2_75 mod"><span class="pin-tag">D20</span><span class="main">Shift</span></div>
+        </div>
+      </div>
+
+      <div class="rowline">
+        <div class="row-col-label">列<br>D9</div>
+        <div class="row">
+          <div class="key u1_25 mod"><span class="pin-tag">D0</span><span class="main">Win</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D1</span><span class="main">Alt</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D2</span><span class="main">Ctrl</span></div>
+          <div class="key u6_25 mod"><span class="pin-tag">D3</span><span class="main">Space</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D4</span><span class="main">Ctrl</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D10</span><span class="main">Alt</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D14</span><span class="main">Menu</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D15</span><span class="main">Fn</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note">
+      <h3>列ワイヤー(5本)</h3>
+      <p>同じ行の全キーを1本のワイヤーで直列に繋ぎ、行の端でPro Microの列ピンへ。D5=Row1、D6=Row2、D7=Row3、D8=Row4、D9=Row5。</p>
+    </div>
+    <div class="note">
+      <h3>行ワイヤー(13本)</h3>
+      <p>各キーの行ワイヤー側の足を、そのポジション番号のピンへ。<code>D0,D1,D2,D3,D4,D10,D14,D15,D16,D18,D19,D20,D21</code>の13本を、行をまたいで使い回す(例: D0は各行の一番左のキーに共通で使われる)。</p>
+    </div>
+    <div class="note warn">
+      <h3>例外は2箇所だけ</h3>
+      <p>Backspace(<code>D16→D9</code>)と\(<code>D18→D9</code>)は、自分の行(D5/D6)ではなく<strong>Row5の列D9へ配線する</strong>。Pro Microのピンが1本足りず、Row5の空きスロットを間借りしているため。配線時にここだけ見落とすと動かないので要注意。</p>
+    </div>
+    <div class="note">
+      <h3>スペースキー</h3>
+      <p>2スイッチのうち結線するのは1個だけ(<code>D3/D9</code>)。もう1個は電気的に未接続で、キーキャップの水平支持だけが目的。</p>
+    </div>
+  </div>
+</div>

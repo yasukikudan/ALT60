@@ -1,0 +1,203 @@
+<title>ALT60 — 配線プラン</title>
+<style>
+  :root {
+    --bg: #f1efe7;
+    --panel: #ffffff;
+    --ink: #1d1f1a;
+    --ink-dim: #5c5f56;
+    --border: #d6d2c4;
+    --copper: #a85a2a;
+    --pcb: #3c7a5c;
+    --pcb-bg: #e7f0ea;
+    --danger: #a3402f;
+    --danger-bg: #f6e8e4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181a; --panel: #1f2225; --ink: #e9e7de; --ink-dim: #9a9d92;
+      --border: #33362f; --copper: #d68a4c; --pcb: #6fbf95; --pcb-bg: #1c2b23;
+      --danger: #d9836c; --danger-bg: #3a2420;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16181a; --panel: #1f2225; --ink: #e9e7de; --ink-dim: #9a9d92;
+    --border: #33362f; --copper: #d68a4c; --pcb: #6fbf95; --pcb-bg: #1c2b23;
+    --danger: #d9836c; --danger-bg: #3a2420;
+  }
+  :root[data-theme="light"] {
+    --bg: #f1efe7; --panel: #ffffff; --ink: #1d1f1a; --ink-dim: #5c5f56;
+    --border: #d6d2c4; --copper: #a85a2a; --pcb: #3c7a5c; --pcb-bg: #e7f0ea;
+    --danger: #a3402f; --danger-bg: #f6e8e4;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+    padding: 2.5rem 1.5rem 3.5rem;
+  }
+  .page { max-width: 980px; margin: 0 auto; }
+  header { margin-bottom: 1.5rem; }
+  h1 {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 1.4rem; font-weight: 700; margin: 0 0 0.5rem; text-wrap: balance;
+  }
+  header p { margin: 0; color: var(--ink-dim); font-size: 0.92rem; line-height: 1.65; max-width: 72ch; }
+  header p + p { margin-top: 0.5rem; }
+  code {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    background: var(--pcb-bg); color: var(--pcb); padding: 0.05rem 0.32rem; border-radius: 3px; font-size: 0.88em;
+  }
+
+  h2 {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 1rem; font-weight: 700; margin: 2rem 0 0.6rem;
+  }
+
+  .matrix-wrap { overflow-x: auto; margin: 0.8rem 0 1.6rem; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
+  table.matrix { border-collapse: collapse; width: 100%; font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+  table.matrix caption { text-align: left; padding: 0.8rem 1rem 0; font-size: 0.78rem; color: var(--ink-dim); }
+  table.matrix th, table.matrix td {
+    border: 1px solid var(--border); padding: 0.4rem 0.55rem; text-align: center;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace; white-space: nowrap;
+  }
+  table.matrix thead th {
+    background: var(--pcb-bg); color: var(--pcb); font-weight: 700;
+  }
+  table.matrix thead th.corner { background: var(--panel); color: var(--ink-dim); }
+  table.matrix tbody th {
+    background: var(--pcb-bg); color: var(--pcb); font-weight: 700; text-align: left;
+  }
+  table.matrix td.key { color: var(--ink); font-weight: 600; }
+  table.matrix td.empty { color: var(--border); }
+  table.matrix td.exception { background: var(--danger-bg); color: var(--danger); font-weight: 700; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: center;
+    margin: 0 0 1.2rem; padding: 0.8rem 1.05rem;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.78rem; color: var(--ink-dim);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+  .swatch { width: 1rem; height: 1rem; border-radius: 3px; flex: none; }
+  .swatch.normal { background: var(--pcb-bg); border: 1px solid var(--pcb); }
+  .swatch.exception { background: var(--danger-bg); border: 1px solid var(--danger); }
+  .swatch.empty { background: var(--panel); border: 1px dashed var(--border); }
+
+  .notes {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.9rem;
+  }
+  .note {
+    background: var(--panel); border: 1px solid var(--border);
+    border-left: 3px solid var(--pcb); border-radius: 6px; padding: 0.85rem 1rem;
+  }
+  .note.warn { border-left-color: var(--danger); }
+  .note h3 { margin: 0 0 0.4rem; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--pcb); }
+  .note.warn h3 { color: var(--danger); }
+  .note p { margin: 0; font-size: 0.83rem; line-height: 1.6; color: var(--ink-dim); }
+</style>
+
+<div class="page">
+  <header>
+    <h1>ALT60 — 配線プラン</h1>
+    <p>61キー・HHKB風60%レイアウトの手配線マトリクス仕様。<strong>列(5本)= 物理的な行(Row1〜5)、行ピン(13本)= 各行内の左からの位置</strong>という単純な規則だけで、配線を見ればどのキーがどこに繋がるか誰でも判別できる。</p>
+    <p>Pro Micro(ATmega32U4)はGPIOが18本しかなく、行13本+列5本でちょうど使い切る。Row1・Row2はそれぞれ14キーあるため、行ピン13本だけでは1本足りない。<strong>Row5(8キーしか使わない)の余っている行ピンスロットを2つ借用</strong>し、Backspaceと\だけ例外としてRow5用の列(D9)に間借りさせることで、全61キーを過不足なく収めている。</p>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch normal"></span>通常(列=そのキーの物理行)</div>
+    <div class="legend-item"><span class="swatch exception"></span>例外(Row5の空きスロットに間借り)</div>
+    <div class="legend-item"><span class="swatch empty"></span>未使用スロット</div>
+  </div>
+
+  <h2>配線マトリクス(行ピン × 列ピン)</h2>
+  <div class="matrix-wrap">
+    <table class="matrix" id="matrix-table">
+      <caption>列(D5〜D9)がそのまま物理的な行(Row1〜Row5)に対応。行ピン(D0〜D21)は各行内の左からの位置。</caption>
+    </table>
+  </div>
+
+  <div class="notes">
+    <div class="note">
+      <h3>列 = 物理的な行</h3>
+      <p><code>col0=D5→Row1</code> / <code>col1=D6→Row2</code> / <code>col2=D7→Row3</code> / <code>col3=D8→Row4</code> / <code>col4=D9→Row5</code>。この5本さえ間違えなければ「どの行を触っているか」が配線から直読できる。</p>
+    </div>
+    <div class="note">
+      <h3>行ピン = 行内の位置</h3>
+      <p><code>D0,D1,D2,D3,D4,D10,D14,D15,D16,D18,D19,D20,D21</code>の13本を左から順に position 0〜12 に割り当て。Row1/Row2はposition 0〜12で13キー分埋まり、14番目のキー(Backspace/\)だけが例外。</p>
+    </div>
+    <div class="note warn">
+      <h3>例外は2つだけ</h3>
+      <p>Backspace → <code>(D16, D9)</code>、\ → <code>(D18, D9)</code>。Row5はposition 0〜7の8キーしか使わないので、position 8・9(D16・D18)のRow5列(D9)スロットは元々空いている。ここを間借りするだけで、他のどのキーとも衝突しない。</p>
+    </div>
+    <div class="note">
+      <h3>スペースキーの2スイッチ</h3>
+      <p>Row5 position 3 (D3, D9) が結線するスイッチ。ダミー(未結線)側はこのマトリクスに現れない(電気的に存在しないため)。</p>
+    </div>
+    <div class="note">
+      <h3>ファームウェアへの反映</h3>
+      <p>この表がそのまま<code>board_config.h</code>の<code>rowPins[]</code>(D0,D1,D2,D3,D4,D10,D14,D15,D16,D18,D19,D20,D21の順)・<code>colPins[]</code>(D5,D6,D7,D8,D9)・<code>keymap[][]</code>の並びになる。配線とコードが同じ順序・同じ規則で対応するので、あとから見返しても迷わない。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // Physical-row groupings, in left-to-right key order, matching the real
+  // keymap exactly (see board_config.h / keymap_notes.md).
+  const rowDefs = [
+    { label: "Row1", pin: "D5", keys: ["Esc","1","2","3","4","5","6","7","8","9","0","-","=","Backspace*"] },
+    { label: "Row2", pin: "D6", keys: ["Tab","Q","W","E","R","T","Y","U","I","O","P","[","]","\\*"] },
+    { label: "Row3", pin: "D7", keys: ["Ctrl","A","S","D","F","G","H","J","K","L",";","'","Enter"] },
+    { label: "Row4", pin: "D8", keys: ["Shift","Z","X","C","V","B","N","M",",",".","/","Shift"] },
+    { label: "Row5", pin: "D9", keys: ["Win/Caps","Alt","Ctrl","Space","Ctrl","Alt","Menu","Fn"] }
+  ];
+  const rowPins = ["D0","D1","D2","D3","D4","D10","D14","D15","D16","D18","D19","D20","D21"];
+  // The two exceptions: [rowPinIndex, colIndex] pairs borrowed from Row5's
+  // unused slots (Row5 only uses rowPinIndex 0-7).
+  const exceptions = [
+    { r: 8, c: 4, key: "Backspace*" },
+    { r: 9, c: 4, key: "\\*" }
+  ];
+
+  const table = document.getElementById("matrix-table");
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  const corner = document.createElement("th");
+  corner.className = "corner";
+  corner.textContent = "行ピン ＼ 列";
+  headRow.appendChild(corner);
+  rowDefs.forEach(rd => {
+    const th = document.createElement("th");
+    th.innerHTML = `${rd.pin}<br>${rd.label}`;
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  rowPins.forEach((pin, ri) => {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    th.textContent = pin;
+    tr.appendChild(th);
+    rowDefs.forEach((rd, ci) => {
+      const td = document.createElement("td");
+      const exc = exceptions.find(e => e.r === ri && e.c === ci);
+      if (exc) {
+        td.className = "exception";
+        td.textContent = exc.key;
+      } else if (rd.keys[ri] !== undefined) {
+        td.className = "key";
+        td.textContent = rd.keys[ri];
+      } else {
+        td.className = "empty";
+        td.textContent = "—";
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+})();
+</script>
