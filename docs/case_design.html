@@ -141,7 +141,7 @@
     <h1>ALT60(オールライフタイムキーボード) — 3Dプリント用ケース設計仕様</h1>
     <p>3Dプリンター(STL)前提の設計。バラのスタンドオフ部品は使わず、<strong>側壁を持つ完全な一体シェル</strong>としてケースを構成する。トッププレートは側壁の上に直接乗せてネジ止めするだけで、側壁自体がスイッチ/配線用の空洞を作る。</p>
     <p>①トッププレート(スイッチ穴+ネジボス用の縁)、②ボトムシェル(側壁+床+Pro Micro/基板用のくぼみを一体成形)の2パーツで完結する。</p>
-    <p>一般的なキーボードと同じく<strong>手前が低く、奥(背面)が高い傾斜</strong>を付ける。参考値はHHKB実機(手前18mm/奥32mm、打鍵角度約7.45°)。ケース奥行き115.25mm(側壁+ベゼル込み)に同じ角度を当てはめ、<strong>手前18.0mm/奥33.1mm(角度約7.45°)</strong>を採用した。</p>
+    <p>一般的なキーボードと同じく<strong>手前が低く、奥(背面)が高い傾斜</strong>を付ける。ケース奥行き115.25mm(側壁+ベゼル込み)に対し、<strong>手前18.0mm/奥33.1mm(角度約7.45°)</strong>を採用した。</p>
   </header>
 
   <div class="spec-wrap">
@@ -151,7 +151,7 @@
         <tr><th>項目</th><th>寸法</th><th>備考</th></tr>
       </thead>
       <tbody>
-        <tr><td>打鍵傾斜角</td><td class="num">約7.45&nbsp;°</td><td class="note">HHKB実機(手前18mm/奥32mm、奥行き約135mm、約7.45°)を参考に、本機の奥行き115.25mmへ同角度を適用</td></tr>
+        <tr><td>打鍵傾斜角</td><td class="num">約7.45&nbsp;°</td><td class="note">手前18.0mm/奥33.1mmの高さ差(奥行き115.25mm)から算出</td></tr>
         <tr><td>ケース全体高さ・手前(Row5/スペース側)</td><td class="num">18.0&nbsp;mm</td><td class="note">底面(接地面)からトッププレート上面まで</td></tr>
         <tr><td>ケース全体高さ・奥(Row1/USB側)</td><td class="num">33.1&nbsp;mm</td><td class="note">手前18.0mm + 奥行き115.25mm × tan(7.45°)</td></tr>
         <tr><td>ベゼル幅(壁内側〜スイッチ列)</td><td class="num">7.0&nbsp;mm</td><td class="note">四辺とも確保。ネジボスがスイッチ穴と干渉しないための余白</td></tr>
@@ -213,7 +213,7 @@
   <div class="board">
     <figure>
       <svg id="cross-svg" class="cross" viewBox="0 0 380 170" role="img" aria-label="断面図。底面は水平だが、手前18.0mm・奥33.1mmで約7.45度の打鍵傾斜を持つ側面形状。トッププレートが側壁の上端に乗り、奥寄りの厚い床の中にPro Microと基板を収めたくぼみがある様子を示す。"></svg>
-      <figcaption>底面は水平(接地面)、手前18.0mm・奥33.1mmで約7.45°の傾斜(HHKB参考)。床厚は手前5.0mm→奥20.1mmと直線的に変化し、くぼみは厚みが確保できる奥側に配置。</figcaption>
+      <figcaption>底面は水平(接地面)、手前18.0mm・奥33.1mmで約7.45°の傾斜。床厚は手前5.0mm→奥20.1mmと直線的に変化し、くぼみは厚みが確保できる奥側に配置。</figcaption>
     </figure>
   </div>
 
@@ -544,7 +544,7 @@
     g.appendChild(backLbl);
 
     const angleLbl = el("text", { x: Wd * 0.6, y: yTop(Wd * 0.6) - 14, "text-anchor": "middle", "font-size": 6.5, "font-family": "ui-monospace, monospace", fill: "var(--copper)" });
-    angleLbl.textContent = "打鍵傾斜 約7.45°(HHKB参考)";
+    angleLbl.textContent = "打鍵傾斜 約7.45°";
     g.appendChild(angleLbl);
   })();
 })();
