@@ -1,55 +1,37 @@
 # ALT60
 
-A 61-key, HHKB-inspired 60% hand-wired mechanical keyboard, designed to be
-3D-printed and built by hand — no PCB. This repo is both the design spec
-for ALT60 itself and a small reusable framework for bringing up *any*
-hand-wired Pro Micro keyboard from scratch.
+61キー、HHKBを参考にした60%サイズの手配線メカニカルキーボード。PCBを使わず、3Dプリントしたケースで組み立てる前提で設計している。このリポジトリはALT60自体の設計仕様であると同時に、Pro Microベースの手配線キーボードなら何にでも使い回せる小さなフレームワークでもある。
 
-ALT60 grew out of an earlier hand-wired prototype ("ALTKB"), built by
-discovering its pin mapping interactively, key by key, with no upfront
-plan. That process worked but left the wiring hard to read after the
-fact. ALT60 is the do-it-properly version: a clean, documented wiring
-scheme, a matching firmware config, and a 3D-printable case designed
-around it from the start.
+ALT60は、先行して作った手配線プロトタイプ(「ALTKB」)から生まれた。ALTKBはピン配置を1本ずつ発見的に配線して組み上げたもので、動作はするが後から見ると配線の規則性が読み取れない状態になっていた。ALT60はそれをちゃんとやり直したバージョン — 最初から読みやすい配線設計、それに対応したファームウェア設定、そしてその配線を前提に設計した3Dプリント用ケースを揃えている。
 
-## What's here
+## ここに入っているもの
 
 | | |
 |---|---|
-| [`docs/wiring_plan.html`](docs/wiring_plan.html) | The full 13×5 matrix wiring table — which pin pair each of the 61 keys sits on, and why. |
-| [`docs/wiring_layout.html`](docs/wiring_layout.html) | The same wiring, overlaid on the physical key layout — meant to be open while soldering. |
-| [`docs/keymap.html`](docs/keymap.html) | The logical keymap: base layer, Fn layer, JIS/US symbol compensation. |
-| [`docs/case_design.html`](docs/case_design.html) | 3D-printable case spec — plate, walls, screw bosses, MCU pocket, typing-angle wedge, all dimensioned. |
-| [`firmware/`](firmware/) | The firmware. `keyboard_fw/board_config.h` is ALT60's config; `matrix_scan.h`/`keycode_output.h` are generic. |
-| [`CLAUDE.md`](CLAUDE.md) | Agent instructions for bringing up a hand-wired board with AI-assisted pin discovery — written to be reusable for a *different* board too. |
+| [`docs/wiring_plan.html`](docs/wiring_plan.html) | 13×5マトリクスの配線表全体 — 61キーそれぞれがどのピアに乗るか、なぜそうなるか。 |
+| [`docs/wiring_layout.html`](docs/wiring_layout.html) | 同じ配線を実際のキー配置に重ねた図 — はんだ付け中に開いておく用。 |
+| [`docs/keymap.html`](docs/keymap.html) | 論理キーマップ: ベースレイヤー、Fnレイヤー、JIS/US記号補正。 |
+| [`docs/case_design.html`](docs/case_design.html) | 3Dプリント用ケース仕様 — プレート、側壁、ネジボス、MCU用のくぼみ、打鍵傾斜まで全て寸法込み。 |
+| [`firmware/`](firmware/) | ファームウェア本体。`keyboard_fw/board_config.h`がALT60固有の設定、`matrix_scan.h`/`keycode_output.h`は汎用。 |
+| [`CLAUDE.md`](CLAUDE.md) | AIエージェントによる対話的ピン発見を使って手配線ボードを立ち上げるための指示書 — 別のボードでも使い回せるように書いてある。 |
 
-## Keyboard summary
+## キーボード概要
 
-- **61 keys**, 15U × 5-row HHKB-style layout (Row1=14, Row2=14, Row3=13, Row4=12, Row5=8 keys).
-- **No stabilizer on the spacebar** — two independent switches under the 6.25U keycap, only one wired into the matrix; the other is a mechanical-support-only dummy switch.
-- **Full Fn layer**: F-keys, arrows, navigation cluster, media keys, and independent grave (`` ` ``, Fn+Z) / tilde (`~`, Fn+X) bindings — researched against HHKB's own layout rather than guessed.
-- **Runtime JIS/US symbol compensation** (`Fn+Menu`, persisted to EEPROM) for boards used under a Japanese OS keyboard layout despite US-legend keycaps.
-- **NKRO** over USB via [HID-Project](https://github.com/NicoHood/HID)'s `NKROKeyboard`.
+- **61キー**、15U × 5行のHHKB風レイアウト(Row1=14, Row2=14, Row3=13, Row4=12, Row5=8キー)。
+- **スペースキーにスタビライザーなし** — 6.25Uのキーキャップの下に独立したスイッチを2個配置し、マトリクスに結線するのは1個だけ。もう1個は機械的な支持専用のダミースイッチ。
+- **フルFnレイヤー**: Fキー、矢印、ナビゲーションクラスタ、メディアキー、独立したグレイブ(`` ` ``、Fn+Z)/チルダ(`~`、Fn+X)。HHKB本家のレイアウトを調べた上で設計。
+- **実行時JIS/US記号補正**(`Fn+Menu`、EEPROMに保存) — USキーキャップのままWindowsが日本語(JIS)レイアウトになっている環境向け。
+- USB経由の**NKRO**、[HID-Project](https://github.com/NicoHood/HID)の`NKROKeyboard`を使用。
 
-## Wiring, in one sentence
+## 配線を一言で言うと
 
-Column pins (`D5`–`D9`) each drive one physical keyboard row; row pins
-(`D0`,`D1`,`D2`,`D3`,`D4`,`D10`,`D14`,`D15`,`D16`,`D18`,`D19`,`D20`,`D21`)
-select left-to-right position within a row. Two exceptions — Backspace
-and `\`, the 14th key in rows that only have 13 row-pin slots — borrow
-Row5's otherwise-unused row-pin slots. Full detail and rationale:
-[`docs/wiring_plan.html`](docs/wiring_plan.html).
+列ピン(`D5`〜`D9`)がそれぞれ物理的な行を1本ずつ駆動する。行ピン(`D0`,`D1`,`D2`,`D3`,`D4`,`D10`,`D14`,`D15`,`D16`,`D18`,`D19`,`D20`,`D21`)が行内の左から位置を選ぶ。例外は2つだけ — Backspaceと`\`(それぞれRow1・Row2の14番目のキーで、行ピンが13本しかないため)、Row5の空いている行ピンスロットを間借りする。詳細と理由は[`docs/wiring_plan.html`](docs/wiring_plan.html)を参照。
 
-## Case
+## ケース
 
-3D-printed, two parts: a top plate (switch holes only) and a bottom
-shell (integrated side walls, a recessed pocket for a small Pro Micro +
-perfboard sub-assembly, screw bosses molded into the walls — no loose
-standoff hardware). The typing angle (~7.45°, front 18.0mm / back
-33.1mm) follows HHKB's own published dimensions. Full spec, including
-every wall/boss/hole dimension: [`docs/case_design.html`](docs/case_design.html).
+3Dプリント、2パーツ構成: トッププレート(スイッチ穴のみ)とボトムシェル(側壁一体型、小型Pro Micro+ユニバーサル基板用のくぼみ、壁に一体成形したネジボス — バラのスタンドオフ部品なし)。打鍵傾斜(約7.45°、手前18.0mm/奥33.1mm)はHHKB実機の公開寸法を参考にしている。壁・ボス・穴すべての寸法を含む全体仕様は[`docs/case_design.html`](docs/case_design.html)を参照。
 
-## Building the firmware
+## ファームウェアのビルド
 
 ```bash
 arduino-cli core install arduino:avr
@@ -58,23 +40,12 @@ arduino-cli compile --fqbn arduino:avr:leonardo firmware/keyboard_fw
 arduino-cli upload -p <COM_PORT> --fqbn arduino:avr:leonardo firmware/keyboard_fw
 ```
 
-`firmware/keyboard_fw/board_config.h` is ALT60's target configuration,
-derived directly from `docs/wiring_plan.html` — it has **not yet been
-verified against a physically wired board**. If you're building an
-ALT60, wire it per `docs/wiring_layout.html`, then flash
-`firmware/matrix_scanner/matrix_scanner.ino` first and confirm each key
-actually lands on the (row, col) pair `board_config.h` expects before
-trusting it — see `CLAUDE.md` for the full bring-up workflow.
+`firmware/keyboard_fw/board_config.h`は`docs/wiring_plan.html`から直接導いたALT60の目標設定であり、**まだ実機で配線を検証していない**。ALT60を実際に組む場合は`docs/wiring_layout.html`通りに配線したあと、まず`firmware/matrix_scanner/matrix_scanner.ino`を書き込んで、各キーが`board_config.h`の想定通りの(行, 列)に来ているか1つずつ確認してから信用すること — 立ち上げ手順の全体は`CLAUDE.md`を参照。
 
-## Building a *different* hand-wired board with this framework
+## このフレームワークで別のボードを組む場合
 
-`firmware/keyboard_fw/matrix_scan.h` and `keycode_output.h` are fully
-generic — they read everything board-specific from `board_config.h`.
-`firmware/matrix_scanner/matrix_scanner.ino` is the interactive
-pin-discovery tool. `CLAUDE.md` documents the whole process (including
-the failure modes that actually cost time the first time around) so an
-AI agent can run the same bring-up workflow for someone else's board.
+`firmware/keyboard_fw/matrix_scan.h`と`keycode_output.h`は完全に汎用で、ボード固有の情報は全て`board_config.h`から読み込む。`firmware/matrix_scanner/matrix_scanner.ino`が対話的なピン発見ツール。`CLAUDE.md`にはその全工程(実際に時間を食った失敗パターンも含めて)がまとめてあるので、AIエージェントが別の人の手配線ボードでも同じ立ち上げ手順を再現できる。
 
-## License
+## ライセンス
 
-BSD 3-Clause — see [`LICENSE`](LICENSE). Fill in the copyright holder name before publishing.
+BSD 3-Clause — [`LICENSE`](LICENSE)参照。公開前に著作権者名を記入すること。
