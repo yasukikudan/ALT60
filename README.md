@@ -77,4 +77,4 @@ AI agent can run the same bring-up workflow for someone else's board.
 
 ## License
 
-TODO — pick a license before publishing.
+BSD 3-Clause — see [`LICENSE`](LICENSE). Fill in the copyright holder name before publishing.
