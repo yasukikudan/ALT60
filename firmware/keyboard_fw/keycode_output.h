@@ -14,6 +14,7 @@ using namespace BoardConfig;
 
 bool fnHeld = false;
 bool jisMode = false;
+bool macMode = false;
 bool shiftHeld = false;
 uint8_t activeShiftCode = KEY_LEFT_SHIFT;
 
@@ -72,6 +73,12 @@ bool handleFnAndMenu(uint8_t r, uint8_t c, bool pressed) {
       jisMode = !jisMode;
       setJisLed(jisMode);
       EEPROM.update(JIS_MODE_EEPROM_ADDR, jisMode ? 1 : 0);
+    }
+    return true;
+  }
+  if (r == WIN_META_ROW && c == WIN_META_COL && fnHeld) {
+    if (pressed) {
+      macMode = !macMode;
     }
     return true;
   }
@@ -178,13 +185,15 @@ bool handleFnMedia(uint8_t r, uint8_t c, bool pressed) {
   return false;
 }
 
-// Former dedicated Win key: base keymap entry sends Caps/Zenkaku-Hankaku
-// (see board_config.h), but Fn+this position sends the real Win/Meta key
-// instead, regardless of jisMode.
-bool handleFnMeta(uint8_t r, uint8_t c, bool pressed) {
-  if (!(fnHeld && r == WIN_META_ROW && c == WIN_META_COL)) return false;
-  sendKey(KEY_LEFT_GUI, pressed);
-  return true;
+// Mac mode (toggled by Fn+Win, see handleFnAndMenu): the bottom-row Ctrl
+// keys beside Space send Cmd instead of Ctrl. Only applies to a bare
+// (non-Fn) press -- if Fn is held, the generic "Fn eats undefined
+// combos" swallow in handleKeyEvent already took it before this runs.
+bool handleMacModeCtrl(uint8_t r, uint8_t c, bool pressed) {
+  if (!macMode) return false;
+  if (r == CTRL_L_ROW && c == CTRL_L_COL) { sendKey(KEY_LEFT_GUI, pressed); return true; }
+  if (r == CTRL_R_ROW && c == CTRL_R_COL) { sendKey(KEY_RIGHT_GUI, pressed); return true; }
+  return false;
 }
 
 // Handles Left/Right Shift's own key position directly (sends its real HID
@@ -302,7 +311,6 @@ void handleKeyEvent(uint8_t r, uint8_t c, bool pressed) {
   if (handleFnArrows(r, c, pressed)) return;
   if (handleFnNavigation(r, c, pressed)) return;
   if (handleFnMedia(r, c, pressed)) return;
-  if (handleFnMeta(r, c, pressed)) return;
 
   if (trackShiftState(r, c, pressed)) return;
 
@@ -316,6 +324,8 @@ void handleKeyEvent(uint8_t r, uint8_t c, bool pressed) {
   // Fn is held but this position has no Fn-layer binding -- swallow it
   // instead of falling through to its normal (non-Fn) keycode.
   if (fnHeld) return;
+
+  if (handleMacModeCtrl(r, c, pressed)) return;
 
   uint8_t code = keymap[r][c];
   if (jisMode && jisOverride[r][c] != 0) {

@@ -114,8 +114,18 @@ const uint8_t LSHIFT_ROW = 0, LSHIFT_COL = 3;
 const uint8_t RSHIFT_ROW = 11, RSHIFT_COL = 3;
 
 // Former dedicated Win key: base sends Caps (US) / Zenkaku-Hankaku (JIS, see
-// jisOverride above), Fn+this position sends the actual Win/Meta key.
+// jisOverride above). Fn+this position toggles "Mac mode" (see
+// CTRL_L/CTRL_R below) instead of momentarily sending Win/Meta.
 const uint8_t WIN_META_ROW = 0, WIN_META_COL = 4;
+
+// Mac mode (Fn+Win toggles it): swaps the bottom-row Ctrl keys beside
+// Space to send Cmd instead, for thumb-position parity with a real Mac
+// keyboard. The HHKB-style Caps-position Ctrl (pos0, col2 above) is
+// deliberately NOT swapped -- it stays genuine Ctrl even in Mac mode,
+// since that's the position people actually want for Unix-style
+// shortcuts (emacs bindings, terminal Ctrl-C, etc.) regardless of OS.
+const uint8_t CTRL_L_ROW = 3, CTRL_L_COL = 4; // pos3/col4, "Ctrl" left of Space
+const uint8_t CTRL_R_ROW = 9, CTRL_R_COL = 4; // pos9/col4, "Ctrl" right of Space
 
 // JIS-fix-up positions (only meaningful if using the JIS feature above).
 const uint8_t QUOTE_ROW = 11, QUOTE_COL = 2;
