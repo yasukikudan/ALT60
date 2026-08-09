@@ -33,6 +33,7 @@ void setJisLed(bool on) {
 }
 
 const int JIS_MODE_EEPROM_ADDR = 0;
+const int MAC_MODE_EEPROM_ADDR = 1;
 
 // Re-applies the LED every call rather than trusting it to stay put -- the
 // USB stack blinks RX/TX LEDs for its own activity indication on some
@@ -50,6 +51,9 @@ void begin() {
   // JIS mode without needing Fn+Menu pressed once first.
   jisMode = (EEPROM.read(JIS_MODE_EEPROM_ADDR) != 0);
   setJisLed(jisMode);
+  // Mac mode defaults OFF on an erased/new board (unlike JIS mode above) --
+  // only a literal 1 (an explicit prior toggle) turns it on at boot.
+  macMode = (EEPROM.read(MAC_MODE_EEPROM_ADDR) == 1);
 }
 
 void sendKey(uint8_t code, bool pressed) {
@@ -79,6 +83,7 @@ bool handleFnAndMenu(uint8_t r, uint8_t c, bool pressed) {
   if (r == WIN_META_ROW && c == WIN_META_COL && fnHeld) {
     if (pressed) {
       macMode = !macMode;
+      EEPROM.update(MAC_MODE_EEPROM_ADDR, macMode ? 1 : 0);
     }
     return true;
   }
