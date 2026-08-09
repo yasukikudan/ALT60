@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALT60 — 設計ドキュメント</title>
+<style>
+  :root {
+    --bg: #f1efe7; --panel: #ffffff; --ink: #1d1f1a; --ink-dim: #5c5f56;
+    --border: #d6d2c4; --copper: #a85a2a; --pcb: #3c7a5c; --pcb-bg: #e7f0ea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181a; --panel: #1f2225; --ink: #e9e7de; --ink-dim: #9a9d92;
+      --border: #33362f; --copper: #d68a4c; --pcb: #6fbf95; --pcb-bg: #1c2b23;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+    padding: 3rem 1.5rem;
+  }
+  .page { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 1.5rem; margin: 0 0 0.5rem;
+  }
+  p.lead { color: var(--ink-dim); font-size: 0.95rem; line-height: 1.6; max-width: 60ch; margin: 0 0 2rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  a.card {
+    display: block; background: var(--panel); border: 1px solid var(--border);
+    border-left: 3px solid var(--pcb); border-radius: 8px; padding: 1.1rem 1.3rem;
+    text-decoration: none; color: inherit;
+  }
+  a.card:hover { border-left-color: var(--copper); }
+  .card h2 {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 1rem; margin: 0 0 0.4rem; color: var(--pcb);
+  }
+  .card p { margin: 0; font-size: 0.85rem; color: var(--ink-dim); line-height: 1.5; }
+  footer { margin-top: 2.5rem; font-size: 0.8rem; color: var(--ink-dim); }
+  footer a { color: var(--pcb); }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>ALT60 — 設計ドキュメント</h1>
+  <p class="lead">61キー・HHKB風60%手配線キーボードの設計仕様。配線・キーマップ・ケースをそれぞれ独立したページにまとめている。</p>
+  <div class="cards">
+    <a class="card" href="wiring_plan.html">
+      <h2>配線プラン</h2>
+      <p>13×5マトリクスの配線表。全61キーがどのピン対に乗るか。</p>
+    </a>
+    <a class="card" href="wiring_layout.html">
+      <h2>配線レイアウト図</h2>
+      <p>実際のキー配置にピン番号を直書きした、はんだ付け作業用の図。</p>
+    </a>
+    <a class="card" href="keymap.html">
+      <h2>キーマップ</h2>
+      <p>ベースレイヤー・Fnレイヤー・JIS/US記号補正。</p>
+    </a>
+    <a class="card" href="case_design.html">
+      <h2>ケース設計</h2>
+      <p>3Dプリント用トッププレート/ボトムシェルの全寸法。</p>
+    </a>
+  </div>
+  <footer>ソース: <a href="https://github.com/yasukikudan/ALT60">github.com/yasukikudan/ALT60</a></footer>
+</div>
+</body>
+</html>
