@@ -125,6 +125,7 @@
     <h1>ALT60 — 配線レイアウト図</h1>
     <p>実際のキー配置の上に配線ピンを直書きした、はんだ付け作業用の図。左端の緑ラベルがその行全体をまとめる<strong>列ワイヤー</strong>(物理的な行1本につき1本)。各キーの銅色の小さい数字がその行内で使う<strong>行ワイヤー</strong>のピン番号。</p>
     <p>配線は「同じ行の全キーを1本の列ワイヤーで直列に繋ぎ、各キーからそのポジション番号の行ワイヤーへ1本ずつ配線する」という通常のマトリクス配線そのまま。</p>
+    <p>最下段(Row5)だけはD0から順に詰めていない。スペースキーが6.25U分を1スロットで占有するため、単純に左詰めするとCtrl/Alt/Menu/Fnなど右側のキーほど配線が実際の位置から遠いピンへ延ばされてしまう。ここでは<strong>各キーの物理位置に一番近い行ピンを選んで</strong>いるので、右へ行くほど配線を大きく引き延ばす必要はない。</p>
   </header>
 
   <div class="legend">
@@ -133,7 +134,7 @@
       通常キー(上:行ワイヤーのピン/下:キー)
     </div>
     <div class="legend-item">
-      <span class="legend-swatch exc"><span class="pin-tag">D16→D9</span>Key</span>
+      <span class="legend-swatch exc"><span class="pin-tag">D15→D9</span>Key</span>
       例外キー(自分の行の列ワイヤーではなく、Row5の列D9に配線)
     </div>
   </div>
@@ -157,7 +158,7 @@
           <div class="key u1"><span class="pin-tag">D19</span><span class="main">0</span></div>
           <div class="key u1"><span class="pin-tag">D20</span><span class="main">-</span></div>
           <div class="key u1"><span class="pin-tag">D21</span><span class="main">=</span></div>
-          <div class="key u2 mod exception"><span class="pin-tag">D16→D9</span><span class="main">Backspace</span></div>
+          <div class="key u2 mod exception"><span class="pin-tag">D15→D9</span><span class="main">Backspace</span></div>
         </div>
       </div>
 
@@ -177,7 +178,7 @@
           <div class="key u1"><span class="pin-tag">D19</span><span class="main">P</span></div>
           <div class="key u1"><span class="pin-tag">D20</span><span class="main">[</span></div>
           <div class="key u1"><span class="pin-tag">D21</span><span class="main">]</span></div>
-          <div class="key u1_5 mod exception"><span class="pin-tag">D18→D9</span><span class="main">\</span></div>
+          <div class="key u1_5 mod exception"><span class="pin-tag">D16→D9</span><span class="main">\</span></div>
         </div>
       </div>
 
@@ -223,12 +224,12 @@
         <div class="row">
           <div class="key u1_25 mod"><span class="pin-tag">D0</span><span class="main">Win</span></div>
           <div class="key u1_25 mod"><span class="pin-tag">D1</span><span class="main">Alt</span></div>
-          <div class="key u1_25 mod"><span class="pin-tag">D2</span><span class="main">Ctrl</span></div>
-          <div class="key u6_25 mod"><span class="pin-tag">D3</span><span class="main">Space</span></div>
-          <div class="key u1_25 mod"><span class="pin-tag">D4</span><span class="main">Ctrl</span></div>
-          <div class="key u1_25 mod"><span class="pin-tag">D10</span><span class="main">Alt</span></div>
-          <div class="key u1_25 mod"><span class="pin-tag">D14</span><span class="main">Menu</span></div>
-          <div class="key u1_25 mod"><span class="pin-tag">D15</span><span class="main">Fn</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D3</span><span class="main">Ctrl</span></div>
+          <div class="key u6_25 mod"><span class="pin-tag">D14</span><span class="main">Space</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D18</span><span class="main">Ctrl</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D19</span><span class="main">Alt</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D20</span><span class="main">Menu</span></div>
+          <div class="key u1_25 mod"><span class="pin-tag">D21</span><span class="main">Fn</span></div>
         </div>
       </div>
 
@@ -246,7 +247,7 @@
     </div>
     <div class="note warn">
       <h3>例外は2箇所だけ</h3>
-      <p>Backspace(<code>D16→D9</code>)と\(<code>D18→D9</code>)は、自分の行(D5/D6)ではなく<strong>Row5の列D9へ配線する</strong>。Pro Microのピンが1本足りず、Row5の空きスロットを間借りしているため。配線時にここだけ見落とすと動かないので要注意。</p>
+      <p>Backspace(<code>D15→D9</code>)と\(<code>D16→D9</code>)は、自分の行(D5/D6)ではなく<strong>Row5の列D9へ配線する</strong>。Pro Microのピンが1本足りず、Row5の空きスロットを間借りしているため。配線時にここだけ見落とすと動かないので要注意。</p>
     </div>
     <div class="note">
       <h3>スペースキー</h3>

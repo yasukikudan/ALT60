@@ -102,6 +102,7 @@
     <h1>ALT60 — 配線プラン</h1>
     <p>61キー・HHKB風60%レイアウトの手配線マトリクス仕様。<strong>列(5本)= 物理的な行(Row1〜5)、行ピン(13本)= 各行内の左からの位置</strong>という単純な規則だけで、配線を見ればどのキーがどこに繋がるか誰でも判別できる。</p>
     <p>Pro Micro(ATmega32U4)はGPIOが18本しかなく、行13本+列5本でちょうど使い切る。Row1・Row2はそれぞれ14キーあるため、行ピン13本だけでは1本足りない。<strong>Row5(8キーしか使わない)の余っている行ピンスロットを2つ借用</strong>し、Backspaceと\だけ例外としてRow5用の列(D9)に間借りさせることで、全61キーを過不足なく収めている。</p>
+    <p>Row5だけは単純な0〜7の左詰めにしていない。スペースキーが6.25U分の幅を1スロットで占有するため、素直に左から詰めるとMenu/Fnなど後半のキーが物理的にはボードの右端付近にあるのに、行ピン番号は若いまま(=他の行では左寄りの位置を指す番号)になり、配線を右へ右へと引き延ばす必要が出る。そこでRow5の8キーは、<strong>各キーの物理位置に一番近い行ピン番号</strong>を選んで割り当て、後半キーの引き延ばしを最小限にしている。</p>
   </header>
 
   <div class="legend">
@@ -128,11 +129,15 @@
     </div>
     <div class="note warn">
       <h3>例外は2つだけ</h3>
-      <p>Backspace → <code>(D16, D9)</code>、\ → <code>(D18, D9)</code>。Row5はposition 0〜7の8キーしか使わないので、position 8・9(D16・D18)のRow5列(D9)スロットは元々空いている。ここを間借りするだけで、他のどのキーとも衝突しない。</p>
+      <p>Backspace → <code>(D15, D9)</code>、\ → <code>(D16, D9)</code>。Row5は8キー分(position 0,1,3,6,9,10,11,12)しか使わないので、空いているposition 7・8(D15・D16)のRow5列(D9)スロットを間借りする。他のどのキーとも衝突しない。</p>
+    </div>
+    <div class="note">
+      <h3>Row5の位置一覧</h3>
+      <p>position 0=Win/Caps, 1=Alt, 3=Ctrl, 6=Space, 7=Backspace(例外), 8=\(例外), 9=Ctrl, 10=Alt, 11=Menu, 12=Fn。position 2・4・5は未使用。</p>
     </div>
     <div class="note">
       <h3>スペースキーの2スイッチ</h3>
-      <p>Row5 position 3 (D3, D9) が結線するスイッチ。ダミー(未結線)側はこのマトリクスに現れない(電気的に存在しないため)。</p>
+      <p>Row5 position 6 (D14, D9) が結線するスイッチ。ダミー(未結線)側はこのマトリクスに現れない(電気的に存在しないため)。</p>
     </div>
     <div class="note">
       <h3>ファームウェアへの反映</h3>
@@ -145,19 +150,30 @@
 (function () {
   // Physical-row groupings, in left-to-right key order, matching the real
   // keymap exactly (see board_config.h / keymap_notes.md).
+  // Row5 positions are NOT simply 0-7 left-to-right like the other rows.
+  // The spacebar eats 6.25U of width in one "slot", so Row5's later keys
+  // (Ctrl/Alt/Menu/Fn) sit much further right physically than their naive
+  // index would suggest -- position N in a mostly-1U row lands at roughly
+  // (N+0.5)U, but Row5's Fn key is physically at ~14.4U. Using positions
+  // 0-7 for Row5 would force every row-pin wire past the spacebar to run
+  // increasingly far right to reach its Row5 key. Instead, Row5's 8 keys
+  // are assigned to the row-pin index whose *typical* physical location
+  // (across the other rows) is closest to that key's real position, which
+  // keeps every row-pin wire's Row5 detour short instead of just the
+  // early ones.
   const rowDefs = [
-    { label: "Row1", pin: "D5", keys: ["Esc","1","2","3","4","5","6","7","8","9","0","-","=","Backspace*"] },
-    { label: "Row2", pin: "D6", keys: ["Tab","Q","W","E","R","T","Y","U","I","O","P","[","]","\\*"] },
+    { label: "Row1", pin: "D5", keys: ["Esc","1","2","3","4","5","6","7","8","9","0","-","="] },
+    { label: "Row2", pin: "D6", keys: ["Tab","Q","W","E","R","T","Y","U","I","O","P","[","]"] },
     { label: "Row3", pin: "D7", keys: ["Ctrl","A","S","D","F","G","H","J","K","L",";","'","Enter"] },
     { label: "Row4", pin: "D8", keys: ["Shift","Z","X","C","V","B","N","M",",",".","/","Shift"] },
-    { label: "Row5", pin: "D9", keys: ["Win/Caps","Alt","Ctrl","Space","Ctrl","Alt","Menu","Fn"] }
+    { label: "Row5", pin: "D9", keys: ["Win/Caps","Alt","—","Ctrl","—","—","Space","Backspace*","\\*","Ctrl","Alt","Menu","Fn"] }
   ];
   const rowPins = ["D0","D1","D2","D3","D4","D10","D14","D15","D16","D18","D19","D20","D21"];
   // The two exceptions: [rowPinIndex, colIndex] pairs borrowed from Row5's
-  // unused slots (Row5 only uses rowPinIndex 0-7).
+  // unused slots (position 7 and 8 -- Row5 itself skips those to make room).
   const exceptions = [
-    { r: 8, c: 4, key: "Backspace*" },
-    { r: 9, c: 4, key: "\\*" }
+    { r: 7, c: 4, key: "Backspace*" },
+    { r: 8, c: 4, key: "\\*" }
   ];
 
   const table = document.getElementById("matrix-table");

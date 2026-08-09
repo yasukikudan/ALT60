@@ -14,10 +14,16 @@
 //
 // Wiring rule this config follows (see docs/wiring_plan.html for the full
 // rationale): colPins[] index = physical keyboard row (Row1..Row5, one
-// pin per row). rowPins[] index = left-to-right position within a row.
-// Two documented exceptions (Backspace, \) borrow Row5's otherwise-unused
-// row-pin slots 8/9 under Row5's column, because Row1/Row2 have 14 keys
-// each and there are only 13 row pins -- see docs/wiring_plan.html.
+// pin per row). rowPins[] index = left-to-right position within a row --
+// except Row5, whose 8 keys are NOT simply positions 0-7: the spacebar
+// eats 6.25U in one slot, so Row5's later keys sit far to the right
+// physically, and using 0-7 would force those row-pin wires into long
+// rightward detours. Row5 instead uses whichever position index sits
+// physically closest to each key (0,1,3,6,9,10,11,12), leaving 7 and 8
+// genuinely free for the two documented exceptions (Backspace, \) --
+// Row1/Row2 have 14 keys each but there are only 13 row pins, so those
+// two borrow Row5's column at those otherwise-unused slots. Full
+// rationale and the physical-position math: docs/wiring_plan.html.
 // ============================================================================
 
 namespace BoardConfig {
@@ -47,20 +53,28 @@ const unsigned long CHATTER_WINDOW_MS = 300; // stats only, see matrix_scan.h
 // keymap[row][col], 0 = no key at that position, FN_LAYER = this position
 // is the Fn key itself (sends nothing on its own).
 // row = position-within-row (0..12), col = physical row (0=Row1..4=Row5).
+// col4 (Row5) positions are NOT a simple 0-7 left-to-right run like the
+// other columns. The spacebar occupies 6.25U in one slot, so Row5's later
+// keys (Ctrl/Alt/Menu/Fn) sit far to the right physically -- using
+// positions 0-7 would force every one of those row-pin wires to detour
+// increasingly far right to reach them. Instead each Row5 key uses the
+// row-pin index whose typical physical location (in the other columns)
+// is closest to that key's real position: 0,1,3,6,9,10,11,12 (skipping
+// 2,4,5 -- genuinely unused -- and 7,8, borrowed below by Backspace/\).
 const uint8_t keymap[NUM_ROWS][NUM_COLS] = {
   /* pos0  */ {KEY_ESC,   KEY_TAB,        KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_CAPS_LOCK}, // col4: base=Caps(US)/Zenkaku-Hankaku(JIS); Fn+this=Win/Meta
   /* pos1  */ {KEY_1,     KEY_Q,          KEY_A,         KEY_Z,          KEY_LEFT_ALT},
-  /* pos2  */ {KEY_2,     KEY_W,          KEY_S,         KEY_X,          KEY_LEFT_CTRL},
-  /* pos3  */ {KEY_3,     KEY_E,          KEY_D,         KEY_C,          KEY_SPACE},
-  /* pos4  */ {KEY_4,     KEY_R,          KEY_F,         KEY_V,          KEY_RIGHT_CTRL},
-  /* pos5  */ {KEY_5,     KEY_T,          KEY_G,         KEY_B,          KEY_RIGHT_ALT},
-  /* pos6  */ {KEY_6,     KEY_Y,          KEY_H,         KEY_N,          KEY_MENU},        // Fn+Menu toggles JIS mode
-  /* pos7  */ {KEY_7,     KEY_U,          KEY_J,         KEY_M,          FN_LAYER},        // Fn: sends nothing on its own
-  /* pos8  */ {KEY_8,     KEY_I,          KEY_K,         KEY_COMMA,      KEY_BACKSPACE},   // col4: exception, borrows Row5's slot
-  /* pos9  */ {KEY_9,     KEY_O,          KEY_L,         KEY_PERIOD,     KEY_BACKSLASH},   // col4: exception, borrows Row5's slot
-  /* pos10 */ {KEY_0,     KEY_P,          KEY_SEMICOLON, KEY_SLASH,      0},
-  /* pos11 */ {KEY_MINUS, KEY_LEFT_BRACE, KEY_QUOTE,     KEY_RIGHT_SHIFT, 0},
-  /* pos12 */ {KEY_EQUAL, KEY_RIGHT_BRACE, KEY_RETURN,   0,              0},
+  /* pos2  */ {KEY_2,     KEY_W,          KEY_S,         KEY_X,          0},
+  /* pos3  */ {KEY_3,     KEY_E,          KEY_D,         KEY_C,          KEY_LEFT_CTRL},
+  /* pos4  */ {KEY_4,     KEY_R,          KEY_F,         KEY_V,          0},
+  /* pos5  */ {KEY_5,     KEY_T,          KEY_G,         KEY_B,          0},
+  /* pos6  */ {KEY_6,     KEY_Y,          KEY_H,         KEY_N,          KEY_SPACE},
+  /* pos7  */ {KEY_7,     KEY_U,          KEY_J,         KEY_M,          KEY_BACKSPACE},   // col4: exception, borrows Row5's unused slot
+  /* pos8  */ {KEY_8,     KEY_I,          KEY_K,         KEY_COMMA,      KEY_BACKSLASH},   // col4: exception, borrows Row5's unused slot
+  /* pos9  */ {KEY_9,     KEY_O,          KEY_L,         KEY_PERIOD,     KEY_RIGHT_CTRL},
+  /* pos10 */ {KEY_0,     KEY_P,          KEY_SEMICOLON, KEY_SLASH,      KEY_RIGHT_ALT},
+  /* pos11 */ {KEY_MINUS, KEY_LEFT_BRACE, KEY_QUOTE,     KEY_RIGHT_SHIFT, KEY_MENU},       // Fn+Menu toggles JIS mode
+  /* pos12 */ {KEY_EQUAL, KEY_RIGHT_BRACE, KEY_RETURN,   0,              FN_LAYER},        // Fn: sends nothing on its own
 };
 
 // --- JIS compensation (optional feature) -----------------------------------
@@ -94,8 +108,8 @@ const bool    digitShiftSuppress[NUM_ROWS] = {0, 0, true,           0, 0, 0, tru
 
 // --- Fn layer position map --------------------------------------------------
 // Every FOO_ROW/FOO_COL pair below is a (row index, col index) into keymap[][].
-const uint8_t FN_ROW = 7, FN_COL = 4;          // Fn key itself
-const uint8_t MENU_ROW = 6, MENU_COL = 4;      // Fn+Menu toggles JIS mode
+const uint8_t FN_ROW = 12, FN_COL = 4;         // Fn key itself
+const uint8_t MENU_ROW = 11, MENU_COL = 4;     // Fn+Menu toggles JIS mode
 const uint8_t LSHIFT_ROW = 0, LSHIFT_COL = 3;
 const uint8_t RSHIFT_ROW = 11, RSHIFT_COL = 3;
 
@@ -106,7 +120,7 @@ const uint8_t WIN_META_ROW = 0, WIN_META_COL = 4;
 // JIS-fix-up positions (only meaningful if using the JIS feature above).
 const uint8_t QUOTE_ROW = 11, QUOTE_COL = 2;
 const uint8_t EQUAL_ROW = 12, EQUAL_COL = 0;
-const uint8_t BACKSLASH_ROW = 9, BACKSLASH_COL = 4;   // exception position
+const uint8_t BACKSLASH_ROW = 8, BACKSLASH_COL = 4;   // exception position
 const uint8_t MINUS_ROW = 11, MINUS_COL = 0;
 const uint8_t SEMICOLON_ROW = 10, SEMICOLON_COL = 2;
 
@@ -134,8 +148,8 @@ const uint8_t PGDN_ROW = 9, PGDN_COL = 3;
 const uint8_t PRTSC_ROW = 8, PRTSC_COL = 1;
 const uint8_t SCRLK_ROW = 9, SCRLK_COL = 1;
 const uint8_t PAUSE_ROW = 10, PAUSE_COL = 1;
-const uint8_t DELETE_ROW = 8, DELETE_COL = 4;   // exception position (Backspace)
-const uint8_t INSERT_ROW = 9, INSERT_COL = 4;   // exception position (\)
+const uint8_t DELETE_ROW = 7, DELETE_COL = 4;   // exception position (Backspace)
+const uint8_t INSERT_ROW = 8, INSERT_COL = 4;   // exception position (\)
 
 // Fn layer media keys (Consumer Control usage page, not Keyboard).
 const uint8_t VOLDOWN_ROW = 1, VOLDOWN_COL = 2;
