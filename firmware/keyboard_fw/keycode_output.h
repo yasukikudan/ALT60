@@ -54,6 +54,21 @@ void begin() {
   // Mac mode defaults OFF on an erased/new board (unlike JIS mode above) --
   // only a literal 1 (an explicit prior toggle) turns it on at boot.
   macMode = (EEPROM.read(MAC_MODE_EEPROM_ADDR) == 1);
+  // Sends an initial all-zero Consumer Control report. Without this some
+  // hosts (macOS noticeably more than Windows) can fail to recognize the
+  // Consumer Control HID collection at enumeration time, and volume/media
+  // keys silently do nothing even though the descriptor is present.
+  Consumer.begin();
+}
+
+// JIS symbol compensation only makes sense against a JIS-interpreting host
+// (Windows set to Japanese layout). It has nothing to compensate for on a
+// Mac (macOS input sources don't reinterpret raw HID codes the same way),
+// so Mac mode always overrides jisMode off for behavior purposes -- the
+// jisMode toggle itself, its LED, and its EEPROM value are untouched, so
+// leaving Mac mode restores whatever JIS preference was set before.
+bool jisActive() {
+  return jisMode && !macMode;
 }
 
 void sendKey(uint8_t code, bool pressed) {
@@ -115,9 +130,9 @@ bool handleFnGraveKeys(uint8_t r, uint8_t c, bool pressed) {
   bool isTilde = (r == TILDE_ROW && c == TILDE_COL);
   if (!isGrave && !isTilde) return false;
 
-  if (isGrave && !jisMode) {
+  if (isGrave && !jisActive()) {
     sendKey(KEY_TILDE, pressed);
-  } else if (isGrave && jisMode) {
+  } else if (isGrave && jisActive()) {
     if (pressed) {
       NKROKeyboard.press(KEY_LEFT_SHIFT);
       NKROKeyboard.press(KEY_LEFT_BRACE);
@@ -126,7 +141,7 @@ bool handleFnGraveKeys(uint8_t r, uint8_t c, bool pressed) {
       releaseSyntheticShift();
     }
   } else { // isTilde
-    uint8_t symbol = jisMode ? KEY_EQUAL : KEY_TILDE;
+    uint8_t symbol = jisActive() ? KEY_EQUAL : KEY_TILDE;
     if (pressed) {
       NKROKeyboard.press(KEY_LEFT_SHIFT);
       NKROKeyboard.press((KeyboardKeycode)symbol);
@@ -159,7 +174,27 @@ bool handleFnNavigation(uint8_t r, uint8_t c, bool pressed) {
   if (r == PGUP_ROW && c == PGUP_COL)   { sendKey(KEY_PAGE_UP, pressed);  return true; }
   if (r == END_ROW && c == END_COL)     { sendKey(KEY_END, pressed);     return true; }
   if (r == PGDN_ROW && c == PGDN_COL)   { sendKey(KEY_PAGE_DOWN, pressed); return true; }
-  if (r == PRTSC_ROW && c == PRTSC_COL) { sendKey(KEY_PRINTSCREEN, pressed); return true; }
+  if (r == PRTSC_ROW && c == PRTSC_COL) {
+    // KEY_PRINTSCREEN does nothing on macOS -- there's no such key on a Mac
+    // keyboard. In Mac mode, send Cmd+Shift+3 (full-screen screenshot)
+    // instead. Doesn't try to protect a real Cmd the user might already be
+    // holding (same class of risk as any synthetic-modifier chord in this
+    // file) -- low-impact here since PrintScreen is rarely chorded with Cmd.
+    if (macMode) {
+      if (pressed) {
+        NKROKeyboard.press(KEY_LEFT_GUI);
+        NKROKeyboard.press(KEY_LEFT_SHIFT);
+        NKROKeyboard.press(KEY_3);
+      } else {
+        NKROKeyboard.release(KEY_3);
+        NKROKeyboard.release(KEY_LEFT_SHIFT);
+        NKROKeyboard.release(KEY_LEFT_GUI);
+      }
+    } else {
+      sendKey(KEY_PRINTSCREEN, pressed);
+    }
+    return true;
+  }
   if (r == SCRLK_ROW && c == SCRLK_COL) { sendKey(KEY_SCROLL_LOCK, pressed); return true; }
   if (r == PAUSE_ROW && c == PAUSE_COL) { sendKey(KEY_PAUSE, pressed);    return true; }
   if (r == DELETE_ROW && c == DELETE_COL) { sendKey(KEY_DELETE, pressed); return true; }
@@ -223,12 +258,13 @@ bool trackShiftState(uint8_t r, uint8_t c, bool pressed) {
 
 // --- JIS compensation handlers ---------------------------------------------
 // These only ever match if board_config.h's *_ROW/*_COL constants point at
-// real keys and jisMode is on. On a board that doesn't need JIS
-// compensation, jisMode never becomes meaningfully true in practice (or you
-// can simply never press Fn+Menu) and these are all silent no-ops.
+// real keys and jisActive() is true (jisMode on AND not in Mac mode -- see
+// jisActive() above). On a board that doesn't need JIS compensation,
+// jisMode never becomes meaningfully true in practice (or you can simply
+// never press Fn+Menu) and these are all silent no-ops.
 
 bool handleDigitShiftJis(uint8_t r, uint8_t c, bool pressed) {
-  if (!(jisMode && c == 0 && shiftHeld && digitShiftCode[r] != 0)) return false;
+  if (!(jisActive() && c == 0 && shiftHeld && digitShiftCode[r] != 0)) return false;
 
   uint8_t oc = digitShiftCode[r];
   if (digitShiftSuppress[r]) {
@@ -249,7 +285,7 @@ bool handleDigitShiftJis(uint8_t r, uint8_t c, bool pressed) {
 // Unshifted (') = synthetic Shift+7. Shifted (") = real Shift (already
 // held) + 2, since JIS Shift+2 produces ".
 bool handleQuoteJis(uint8_t r, uint8_t c, bool pressed) {
-  if (!(jisMode && r == QUOTE_ROW && c == QUOTE_COL)) return false;
+  if (!(jisActive() && r == QUOTE_ROW && c == QUOTE_COL)) return false;
 
   uint8_t k = shiftHeld ? KEY_2 : KEY_7;
   if (!shiftHeld) {
@@ -263,7 +299,7 @@ bool handleQuoteJis(uint8_t r, uint8_t c, bool pressed) {
 // Shift+\ = | (pipe) = Shift + the JIS yen key (INTERNATIONAL3), not
 // Shift+INTERNATIONAL1 (that gives _).
 bool handleBackslashJis(uint8_t r, uint8_t c, bool pressed) {
-  if (!(jisMode && r == BACKSLASH_ROW && c == BACKSLASH_COL)) return false;
+  if (!(jisActive() && r == BACKSLASH_ROW && c == BACKSLASH_COL)) return false;
 
   uint8_t k = shiftHeld ? KEY_INTERNATIONAL3 : KEY_INTERNATIONAL1;
   sendKey(k, pressed);
@@ -274,7 +310,7 @@ bool handleBackslashJis(uint8_t r, uint8_t c, bool pressed) {
 // (underscore) on US, but plain Shift+MINUS lands on = under JIS -- so use
 // Shift + the JIS "ro" key (INTERNATIONAL1) instead, which is _ shifted.
 bool handleMinusJis(uint8_t r, uint8_t c, bool pressed) {
-  if (!(jisMode && r == MINUS_ROW && c == MINUS_COL && shiftHeld)) return false;
+  if (!(jisActive() && r == MINUS_ROW && c == MINUS_COL && shiftHeld)) return false;
   sendKey(KEY_INTERNATIONAL1, pressed); // _
   return true;
 }
@@ -283,7 +319,7 @@ bool handleMinusJis(uint8_t r, uint8_t c, bool pressed) {
 // US, but plain Shift+SEMICOLON lands on + under JIS -- so let go of real
 // Shift and send plain QUOTE instead (unshifted QUOTE = : under JIS).
 bool handleSemicolonJis(uint8_t r, uint8_t c, bool pressed) {
-  if (!(jisMode && r == SEMICOLON_ROW && c == SEMICOLON_COL && shiftHeld)) return false;
+  if (!(jisActive() && r == SEMICOLON_ROW && c == SEMICOLON_COL && shiftHeld)) return false;
   if (pressed) {
     NKROKeyboard.release((KeyboardKeycode)activeShiftCode);
     NKROKeyboard.press(KEY_QUOTE);
@@ -297,7 +333,7 @@ bool handleSemicolonJis(uint8_t r, uint8_t c, bool pressed) {
 // = is Shift+- (the minus key) on a JIS layout.
 // + (shifted =) = real Shift (already held) + ; , since JIS Shift+; is +.
 bool handleEqualJis(uint8_t r, uint8_t c, bool pressed) {
-  if (!(jisMode && r == EQUAL_ROW && c == EQUAL_COL)) return false;
+  if (!(jisActive() && r == EQUAL_ROW && c == EQUAL_COL)) return false;
 
   if (shiftHeld) {
     sendKey(KEY_SEMICOLON, pressed);
@@ -333,7 +369,7 @@ void handleKeyEvent(uint8_t r, uint8_t c, bool pressed) {
   if (handleMacModeCtrl(r, c, pressed)) return;
 
   uint8_t code = keymap[r][c];
-  if (jisMode && jisOverride[r][c] != 0) {
+  if (jisActive() && jisOverride[r][c] != 0) {
     code = jisOverride[r][c];
   }
   sendKey(code, pressed);
